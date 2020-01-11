@@ -31,9 +31,11 @@ start must not be in the used-cells list"
   (if (gethash start used-cells) (error "Starting from an used cell!"))
   (maze/wilson-erase-loops
    (-unfold  (lambda (current-index)
-               (if (not (gethash current-index used-cells))
+               (if current-index
                    (let ((next-position (maze/--random-walk maze current-index)))
-                     (cons next-position next-position))))
+                     (if (gethash next-position used-cells)
+                         (cons current-index next-position)
+                       (cons current-index nil)))))
              start)))
 
 (defun maze/--create-initial-exclusion-table (maze)
@@ -49,17 +51,18 @@ start must not be in the used-cells list"
 
 ;;; TODO/FIXME the exclusion table makes the whole module non functional (it's not copied!)
 (defun maze/--carve-wilson (maze)
-  (let ((exclusion-table (maze/--create-initial-exclusion-table maze))
+  (let ((new-maze maze)
+        (exclusion-table (maze/--create-initial-exclusion-table maze))
         (maze-size (maze/get-cells-number maze)))
     (while (< (hash-table-count exclusion-table) maze-size)
-      (let ((new-path (maze/--wilson-path maze exclusion-table (maze/random-cell maze exclusion-table))))
+      (let ((new-path (maze/--wilson-path new-maze exclusion-table (maze/random-cell new-maze exclusion-table))))
         ;; TODO/FIXME add the path to both the exclusion table and carve the passages!
         (print (format "%s (%s)" new-path (all-keys exclusion-table)))
         (redisplay)
         (--each (-partition-in-steps 2 1 new-path)
-          (setq maze (maze/carve-passage-index maze (car it) (cadr it))))
+          (setq new-maze (maze/carve-passage-index new-maze (car it) (cadr it))))
         (--each new-path (puthash it t exclusion-table))))
-    maze))
+    new-maze))
 
 (defun maze/wilson (columns rows)
   (maze/--carve-wilson (maze/create-empty columns rows)))
