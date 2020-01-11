@@ -23,6 +23,9 @@
      ((>= column (maze-columns maze)) (format "Out of bound column (%s, %s)" column row))
      ((>= row (maze-rows maze)) (format "Out of bound row (%s, %s)" column row)))))
 
+(defun maze/valid-cell-p (maze cell)
+  (not (maze/error-for-cell maze cell))) ()
+
 (defun maze/check-extremes (maze column row)
   (let ((error-string (maze/error-for-cell maze (list column row))))
     (if error-string
@@ -70,5 +73,9 @@ Throws if the from and to cells are not neighbors"
         (let ((new-maze (maze/copy maze)))
           (puthash connection t (maze-connections new-maze))
           new-maze)))))
+
+(defun maze/get-cells-number (maze)
+  (* (maze-columns maze)
+     (maze-rows maze)))
 
 (provide 'maze-data)

@@ -7,9 +7,6 @@
 (defun maze/bottom-cell (column row)
   (list column (1+ row)))
 
-(defun maze/valid-cell-p (maze cell)
-  (not (maze/error-for-cell maze cell)))
-
 (defun maze/binary--choices (maze column row)
   (--filter (apply #'maze/valid-cell-p (list maze it))
             (list (maze/right-cell column row)
