@@ -14,6 +14,24 @@
     (it "creates a maze with no connections"
       (expect (hash-table-count (maze-connections (maze/create-empty 100 20)))
               :to-be 0)))
+  (describe "maze/index-to-position"
+    (it "throws if the index is out of range"
+      (expect (maze/index-to-position empty-maze -1) :to-throw 'error)
+      (expect (maze/index-to-position empty-maze 28) :to-throw 'error)))
+  (describe "maze/position-to-index"
+    (it "is the inverse of maze/index-to-position"
+      (expect (compose-index-transforms empty-maze 0) :to-be 0)
+      (expect (compose-index-transforms empty-maze 6) :to-be 6)
+      (expect (compose-index-transforms empty-maze 13) :to-be 13)
+      (expect (compose-index-transforms empty-maze 27) :to-be 27))
+    (it "converts the index as expected"
+      (expect (maze/position-to-index empty-maze 0 0) :to-be 0)
+      (expect (maze/position-to-index empty-maze 6 1) :to-be 13)
+      (expect (maze/position-to-index empty-maze 6 3) :to-be 27))
+    (it "throws an error if out of range"
+      (expect (maze/position-to-index empty-maze -1 0) :to-throw 'error)
+      (expect (maze/position-to-index empty-maze 0 -1) :to-throw 'error)
+      (expect (maze/position-to-index empty-maze 7 0) :to-throw 'error)
+      (expect (maze/position-to-index empty-maze 0 7) :to-throw 'error)))
   (describe "maze/copy"
-    (it "creates a deep copy of a maze"
-      )))
+    (it "creates a deep copy of a maze")))
