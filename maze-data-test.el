@@ -1,12 +1,12 @@
 (require 'buttercup)
-(require 'maze)
+(require 'maze-data)
 
 (defconst empty-maze (maze/create-empty 7 4))
 
 (defun compose-index-transforms (maze index)
   (apply #'maze/position-to-index (cons maze (maze/index-to-position maze index))))
 
-(describe "maze"
+(describe "maze-data"
   (describe "maze/create-empty"
     (it "creates a maze with the correct number of columns"
       (expect (maze-columns (maze/create-empty 13 7))

@@ -71,4 +71,4 @@ Throws if the from and to cells are not neighbors"
           (puthash connection t (maze-connections new-maze))
           new-maze)))))
 
-(provide 'maze)
+(provide 'maze-data)
