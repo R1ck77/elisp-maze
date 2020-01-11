@@ -50,8 +50,6 @@
   (let ((first-line "")
         (second-line ""))
     (--each ascii-row (progn
-                        (print (car it))
-                        (print (cadr it))
                         (setq first-line (apply #'concat (cons first-line (car it))))
                         (setq second-line (apply #'concat (cons second-line (cadr it))))))
     (list first-line second-line)))
