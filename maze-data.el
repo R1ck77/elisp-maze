@@ -31,6 +31,7 @@
     (if error-string
         (error error-string))))
 
+;;; TODO/FIXME Bad interface. Change to (maze pos)
 (defun maze/position-to-index (maze column row)
   (maze/check-extremes maze column row)
   (+ column (* row (maze-columns maze))))
@@ -73,6 +74,11 @@ Throws if the from and to cells are not neighbors"
         (let ((new-maze (maze/copy maze)))
           (puthash connection t (maze-connections new-maze))
           new-maze)))))
+
+(defun maze/carve-passage-index (maze from-index to-index)
+  (maze/carve-passage maze
+                      (maze/index-to-position maze from-index)
+                      (maze/index-to-position maze to-index)))
 
 (defun maze/get-cells-number (maze)
   (* (maze-columns maze)
