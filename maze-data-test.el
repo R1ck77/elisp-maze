@@ -4,7 +4,7 @@
 (defconst empty-maze (maze/create-empty 7 4))
 
 (defun compose-index-transforms (maze index)
-  (apply #'maze/position-to-index (cons maze (maze/index-to-position maze index))))
+  (maze/position-to-index maze (maze/index-to-position maze index)))
 
 (describe "maze-data"
   (describe "maze/create-empty"
@@ -28,14 +28,14 @@
       (expect (compose-index-transforms empty-maze 13) :to-be 13)
       (expect (compose-index-transforms empty-maze 27) :to-be 27))
     (it "converts the index as expected"
-      (expect (maze/position-to-index empty-maze 0 0) :to-be 0)
-      (expect (maze/position-to-index empty-maze 6 1) :to-be 13)
-      (expect (maze/position-to-index empty-maze 6 3) :to-be 27))
+      (expect (maze/position-to-index empty-maze (list 0 0)) :to-be 0)
+      (expect (maze/position-to-index empty-maze (list 6 1)) :to-be 13)
+      (expect (maze/position-to-index empty-maze (list 6 3)) :to-be 27))
     (it "throws an error if out of range"
-      (expect (maze/position-to-index empty-maze -1 0) :to-throw 'error)
-      (expect (maze/position-to-index empty-maze 0 -1) :to-throw 'error)
-      (expect (maze/position-to-index empty-maze 7 0) :to-throw 'error)
-      (expect (maze/position-to-index empty-maze 0 7) :to-throw 'error)))
+      (expect (maze/position-to-index empty-maze (list -1 0)) :to-throw 'error)
+      (expect (maze/position-to-index empty-maze (list 0 -1)) :to-throw 'error)
+      (expect (maze/position-to-index empty-maze (list 7 0)) :to-throw 'error)
+      (expect (maze/position-to-index empty-maze (list 0 7)) :to-throw 'error)))
   (describe "maze/carve-passage"
     (it "returns a different maze when the passage doesn't exist"
       (expect (maze/carve-passage empty-maze '(1 2) '(1 3)) :not :to-be empty-maze))

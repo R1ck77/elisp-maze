@@ -31,7 +31,7 @@
     (gethash connection (maze-connections maze))))
 
 (defun maze/cell-to-ASCII (maze column row)
-  (let ((this-index (maze/position-to-index maze column row)))
+  (let ((this-index (maze/position-to-index maze (list column row))))
     (list (list maze/cross-char (if (maze/has-top-passage? maze this-index)
                                     maze/empty-char
                                   maze/horizontal-char))

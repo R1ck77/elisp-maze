@@ -32,9 +32,12 @@
         (error error-string))))
 
 ;;; TODO/FIXME Bad interface. Change to (maze pos)
-(defun maze/position-to-index (maze column row)
-  (maze/check-extremes maze column row)
-  (+ column (* row (maze-columns maze))))
+(defun maze/position-to-index (maze position)
+  "Convers a position (column row) to an index"
+  (let ((column (car position))
+        (row (cadr position)))
+    (maze/check-extremes maze column row)
+    (+ column (* row (maze-columns maze)))))
 
 (defun maze/check-index (maze index)
   (if (< index 0) (error "Index underflow"))
@@ -66,8 +69,8 @@ from and to are (column row) lists
 
 Throws if the from and to cells are not neighbors"
   (maze/throw-when-not-neighbors from to)
-  (let ((from-index (apply #'maze/position-to-index (cons maze from)))
-        (to-index (apply #'maze/position-to-index (cons maze to))))
+  (let ((from-index (maze/position-to-index maze from))
+        (to-index (maze/position-to-index maze to)))
     (let ((connection (maze/sort-passage from-index to-index)))
       (if (gethash connection (maze-connections maze))
           maze

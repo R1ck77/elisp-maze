@@ -1,5 +1,4 @@
 (require 'maze-data)
-;;; TODO/FIXME tests
 
 (defmacro maze/for-each-cell (maze &rest forms)
   "Executes each form with row and column bound to the current position"
@@ -40,7 +39,7 @@
 (defun maze/bottom-cell (column row)
   (list column (1+ row)))
 
-(defun maze/valid-neighbors (maze column row)
+(defun maze/valid-moves (maze column row)
   "Returns an association list of valid neighbors for a specific coordinate
 
 The list has the :top :right :bottom :left keys and can be queried with assq"
@@ -49,6 +48,22 @@ The list has the :top :right :bottom :left keys and can be queried with assq"
                   (cons :bottom (maze/bottom-cell column row))
                   (cons :top (maze/top-cell column row))
                   (cons :left (maze/left-cell column row)))))
+
+(defun maze/valid-neighbors (maze position)
+  "Returns an association list of valid neighbors for a specific coordinate
+
+position is in the form (column raw)
+
+The list has the :top :right :bottom :left keys and can be queried with assq"
+  (let ((column (car position))
+        (row (cadr position)))
+    (--filter (apply #'maze/valid-cell-p (list maze it))
+              (list (maze/right-cell column row)
+                    (maze/bottom-cell column row)
+                    (maze/top-cell column row)
+                    (maze/left-cell column row)))))
+
+
 
 
 (provide 'maze-utils)
