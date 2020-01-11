@@ -32,10 +32,43 @@
   (maze/check-extremes maze column row)
   (+ column (* row (maze-columns maze))))
 
+(defun maze/check-index (maze index)
+  (if (< index 0) (error "Index underflow"))
+  (if (>= index (* (maze-columns maze) (maze-rows maze))) (error "Index underflow")))
+
 (defun maze/index-to-position (maze index)
   (maze/check-index maze index)
   (let ((columns (maze-columns maze)))
     (list (mod index columns)
           (/ index columns))))
+
+(defun maze/throw-when-not-neighbors (from to)
+  (let ((distance (-reduce #'+ (--zip-with (abs (- it other)) from to))))
+    (if (/= distance 1)
+        (error "Non contiguous cells"))))
+
+(defun maze/sort-passage (from to)
+  (if (= from to)
+      (error "invalid connection"))
+  (if (> from to)
+      (cons to from)
+    (cons from to)))
+
+;;; TODO/FIXME very slow: a mutating version of the maze is probably required
+(defun maze/carve-passage (maze from to)
+  "Create a copy of the current maze with a new passage carved in
+
+from and to are (column row) lists
+
+Throws if the from and to cells are not neighbors"
+  (maze/throw-when-not-neighbors from to)
+  (let ((from-index (apply #'maze/position-to-index (cons maze from)))
+        (to-index (apply #'maze/position-to-index (cons maze to))))
+    (let ((connection (maze/sort-passage from-index to-index)))
+      (if (gethash connection (maze-connections maze))
+          maze
+        (let ((new-maze (maze/copy maze)))
+          (puthash connection t (maze-connections new-maze))
+          new-maze)))))
 
 (provide 'maze)
