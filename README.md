@@ -35,6 +35,8 @@ or this:
     ▒▒▒ ▒ ▒▒▒ ▒ ▒ ▒▒▒▒▒ ▒
     ▒           ▒     ▒ ▒
     ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+    
+which btw look way better on a terminal than on the GitHub preview :D
 
 Just don't forget to turn ``font-lock-mode`` on in the buffer.
 
