@@ -47,6 +47,4 @@
     (it "throws an error if the cells are not contiguous"
       (expect (maze/carve-passage empty-maze '(0 2) '(2 2)) :to-throw 'error)
       (expect (maze/carve-passage empty-maze '(1 1) '(1 3)) :to-throw 'error)
-      (expect (maze/carve-passage empty-maze '(1 2) '(2 3)) :to-throw 'error)))
-  (describe "maze/copy"
-    (it "creates a deep copy of a maze")))
+      (expect (maze/carve-passage empty-maze '(1 2) '(2 3)) :to-throw 'error))))
