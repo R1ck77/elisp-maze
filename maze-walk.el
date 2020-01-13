@@ -105,4 +105,17 @@ the function would fail when invoked on a line start)"
         (setq previous-move current-move))
       (maze/walk--show-position delay))))
 
+(defun maze/walk--border-move (available-moves previous-move)
+  (print "Not yet implemented")
+  (car available-moves))
+
+(defun maze/walk-infinite-border-walk (delay)
+  "Walk the maze always keeping a hand on the wall"
+  (let ((previous-move))
+    (while t
+      (let ((current-move (maze/walk--border-move (maze/walk-available-moves) previous-move)))
+        (goto-char (cdr current-move))
+        (setq previous-move current-move))
+      (maze/walk--show-position delay))))
+
 (provide 'maze-walk)

@@ -23,4 +23,8 @@
   (interactive "P")
   (maze/walk-infinite-dumb-random-walk (/ 1.0 (or steps-per-second 10))))
 
+(defun maze/border-walk (steps-per-second)
+  (interactive "P")
+  (maze/walk-infinite-border-walk (/ 1.0 (or steps-per-second 10))))
+
 (provide 'maze)
