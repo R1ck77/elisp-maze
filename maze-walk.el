@@ -1,5 +1,7 @@
 (require 'maze-utils)
 
+(defconst maze-player-char (string-to-char "@"))
+
 (defmacro maze/save-point (&rest forms)
   (let ((pos (make-symbol "pos"))
         (result (make-symbol "result")))
@@ -59,17 +61,21 @@ the function would fail when invoked on a line start)"
                                                                  (cons :bottom #'maze/walk--bottom-move-available)
                                                                  (cons :left #'maze/walk--left-move-available)))))
 
+;;; TODO/FIXME doesn't restore the text properties (which is not actually so bad, no matter how unintended)
+(defun maze/walk--show-position (delay)
+  (let ((current-char (char-after)))
+    (delete-char 1 t)
+    (insert-char maze-player-char)
+    (forward-char -1)
+    (sit-for delay)
+    (delete-char 1)
+    (insert-char current-char)
+    (forward-char -1)))
+
 (defun maze/walk-infinite-dumb-random-walk (&optional delay)
   "Probably the most dumb maze traversal algorithm ever written"
   (while t
     (goto-char (maze/random-choice (maze/walk-available-positions)))
-    (let ((current-char (char-after)))
-      (delete-char 1 t)
-      (insert-char (string-to-char "@"))
-      (forward-char -1)
-      (sit-for (or delay 0.1))
-      (delete-char 1)
-      (insert-char current-char)
-      (forward-char -1))))
+    (maze/walk--show-position (or delay 0.1))))
 
 (provide 'maze-walk)
