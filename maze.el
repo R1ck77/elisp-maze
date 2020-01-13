@@ -17,6 +17,10 @@
 
 (defun maze/silly-walk (steps-per-second)
   (interactive "P")
+  (maze/walk-infinite-silly-random-walk (/ 1.0 (or steps-per-second 10))))
+
+(defun maze/dumb-walk (steps-per-second)
+  (interactive "P")
   (maze/walk-infinite-dumb-random-walk (/ 1.0 (or steps-per-second 10))))
 
 (provide 'maze)
