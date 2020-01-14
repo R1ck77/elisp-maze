@@ -1,5 +1,6 @@
 (require 'maze-binary)
 (require 'maze-wilson)
+(require 'maze-hunt-and-kill)
 (require 'maze-ascii)
 (require 'maze-walk)
 
@@ -14,6 +15,10 @@
 (defun maze/insert-wilson (rows columns)
   (interactive "nRows? \nnColumns? ")
   (maze/insert (maze/wilson columns rows)))
+
+(defun maze/insert-hunt-and-kill (rows columns)
+  (interactive "nRows? \nnColumns? ")
+  (maze/insert (maze/hunt-and-kill columns rows)))
 
 (defun maze/silly-walk (steps-per-second)
   (interactive "P")
