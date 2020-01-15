@@ -83,6 +83,13 @@ Throws if the from and to cells are not neighbors"
                       (maze/index-to-position maze from-index)
                       (maze/index-to-position maze to-index)))
 
+;;; TODO/FIXME test
+(defun maze/carve-path (maze cells)
+  (let ((new-maze maze))
+    (--each (-partition-in-steps 2 1 cells)
+      (setq new-maze (maze/carve-passage-index new-maze (car it) (cadr it))))
+    new-maze))
+
 (defun maze/get-cells-number (maze)
   (* (maze-columns maze)
      (maze-rows maze)))

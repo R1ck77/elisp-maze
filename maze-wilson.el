@@ -46,8 +46,7 @@ start must not be in the used-cells list"
         (maze-size (maze/get-cells-number maze)))
     (while (< (hash-table-count exclusion-table) maze-size)
       (let ((new-path (maze/wilson--path new-maze exclusion-table (maze/random-cell new-maze exclusion-table))))
-        (--each (-partition-in-steps 2 1 new-path)
-          (setq new-maze (maze/carve-passage-index new-maze (car it) (cadr it))))
+        (setq new-maze (maze/carve-path new-maze new-path))
         (--each new-path (puthash it t exclusion-table))))
     new-maze))
 
