@@ -1,5 +1,7 @@
 (require 'maze-data)
 
+(defmacro comment (&rest forms)) ; TODO/FIXME tests?
+
 (defmacro maze/for-each-cell (maze &rest forms)
   "Executes each form with row and column bound to the current position"
   (declare (indent defun))
