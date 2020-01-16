@@ -58,4 +58,25 @@
                                            (list 8 9)))
       (expect (maze/valid-neighbors (maze/create-empty 10 10) '(9 0))
               :to-have-same-items-as (list (list 9 1)
-                                           (list 8 0))))))
+                                           (list 8 0)))))
+  (describe "maze/until"
+    (it "executes at least once"
+      (let ((counter 0))
+        (maze/until (= counter 1)
+          (setq counter (1+ counter)))
+        (expect counter :to-be 1)))
+    (it "evaluates the predicate  at the end of each cycle"
+      (let ((counter 0)
+            (predicate-evaluations 0))
+        (maze/until (progn
+                      (setq predicate-evaluations (1+ predicate-evaluations))
+                      (= counter 5))
+          (setq counter (1+ counter)))
+        (expect counter :to-be 5)
+        (expect predicate-evaluations :to-be 5)))
+    (it "returns the value of the last evaluation"
+      (let* ((counter 0)
+             (result (maze/until (= counter 5)
+                       (setq counter (1+ counter))
+                       (+ counter 12))))
+        (expect result :to-be 17)))))

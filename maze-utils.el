@@ -15,16 +15,19 @@
                  (row (cadr ,tmp)))
              ,@forms))))))
 
-;;; TODO/FIXME tests!
 (defmacro maze/until (condition &rest forms)
+  (declare (indent defun)
+           (debug t))
   (let ((condition-result (make-symbol "condition-result"))
         (result (make-symbol "result")))
-    `(let ((,condition-result t))
-       (while ,condition-result
-         (let ((,result (progn ,@forms)))
-           (setq ,condition-result ,condition)
-           ,result)))))
+    `(let ((,condition-result nil))
+       (let ((,result))
+         (while (not ,condition-result)
+           (setq ,result (progn ,@forms))
+           (setq ,condition-result ,condition))
+         ,result))))
 
+;;; TODO/FIXME allow the use of a specific random seed
 (defun maze/random-choice (items)
   "Straight from the Rosetta Code"
   (let* ((size (length items))
