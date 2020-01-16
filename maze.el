@@ -27,18 +27,21 @@
   (maze/debug--print-state)
   (maze/insert (maze/hunt-and-kill columns rows)))
 
+(defun maze/interpret--delay-value (steps-per-second)
+  (/ 1.0 (or steps-per-second 10)))
+
 (defun maze/silly-walk (steps-per-second)
   (interactive "P")
   (maze/debug--print-state)
-  (maze/walk-infinite-silly-random-walk (/ 1.0 (or steps-per-second 10))))
+  (maze/walk-infinite-silly-random-walk (maze/interpret--delay-value steps-per-second)))
 
 (defun maze/dumb-walk (steps-per-second)
   (interactive "P")
   (maze/debug--print-state)
-  (maze/walk-infinite-dumb-random-walk (/ 1.0 (or steps-per-second 10))))
+  (maze/walk-infinite-dumb-random-walk (maze/interpret--delay-value steps-per-second)))
 
 (defun maze/border-walk (steps-per-second)
   (interactive "P")
-  (maze/walk-infinite-border-walk (/ 1.0 (or steps-per-second 10))))
+  (maze/walk-border-walk (/ 1.0 (or steps-per-second 10))))
 
 (provide 'maze)
