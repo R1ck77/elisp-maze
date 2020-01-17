@@ -2,17 +2,22 @@
 (require 'maze-data)
 (require 'maze-utils)
 
-(defun maze/hk--valid-starting-point (used-cells-table cell-index)
-  (let*  ((neighbors (maze/valid-neighbors maze cell-index))
-          (occupied (length (--filter (gethash it used-cells-table) neighbors))))
-    (and (> occupied 0)
-         (/= occupied (Length neighbors)))))
+(defun maze/hk--occupied-neighbors (used-cells-table cell-index)
+  (--filter (gethash it used-cells-table) (--map (maze/position-to-index maze it) (maze/valid-neighbors maze (maze/index-to-position maze cell-index)))))
 
+(defun maze/hk--valid-starting-point (maze used-cells-table cell-index)
+  (if (not (gethash cell-index used-cells-table))
+   (let*  ((neighbors (maze/valid-neighbors maze (maze/index-to-position maze cell-index)))
+           (occupied (length (--filter (gethash (maze/position-to-index maze it) used-cells-table) neighbors))))
+     (> occupied 0))))
+
+;;; TODO/FIXME not lazy…
 (defun maze/hk--hunt (maze used-cells-table)
-  "Return a new starting cell"
-  (first
-   (--filter (not (gethash it used-cells-table))
-             (number-sequence 0 (1- (maze/get-cells-number maze))))))
+  "Return a cons of a new starting cell followed by an occupied cell to start from"
+  (let ((starting-point (first (--filter (maze/hk--valid-starting-point maze used-cells-table it)
+                                         (number-sequence 0 (1- (maze/get-cells-number maze)))))))
+    (if starting-point
+        (cons starting-point (maze/random-choice (maze/hk--occupied-neighbors used-cells-table starting-point))))))
 
 
 (defun maze/hk--stop-f (maze current-index next-candidate)
@@ -58,9 +63,14 @@
       (while (< (hash-table-count used-cells-table)
                 (maze/get-cells-number new-maze))
         (puthash start-cell t used-cells-table)
+        ;;; TODO/FIXME this whole module is a thing of nightmare
         (let ((new-path (maze/create-path new-maze start-cell #'maze/hk--stop-f next-index-f)))
+          (--each new-path (puthash it t used-cells-table))
           (setq new-maze (maze/carve-path new-maze new-path))
-          (setq start-cell (maze/hk--hunt new-maze used-cells-table)) ;;; TODO/FIXME inverted condition
+          (setq start-previous (maze/hk--hunt new-maze used-cells-table)) ;;; TODO/FIXME inverted condition
+          (when start-previous
+            (setq new-maze (maze/carve-passage-index new-maze (car start-previous) (cdr start-previous)))
+            (setq start-cell (car start-previous)))
           )))
     new-maze))
 
