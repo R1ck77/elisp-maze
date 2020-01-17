@@ -2,6 +2,12 @@
 
 (defmacro comment (&rest forms)) ; TODO/FIXME tests?
 
+(defconst maze/random-state (cl-make-random-state t)
+  "The random state used to generate the mazes")
+
+(defvar maze/debug t
+  "Print the current random state before generating each maze")
+
 (defmacro maze/for-each-cell (maze &rest forms)
   "Executes each form with row and column bound to the current position"
   (declare (indent defun))
@@ -27,12 +33,11 @@
            (setq ,condition-result ,condition))
          ,result))))
 
-;;; TODO/FIXME allow the use of a specific random seed
 (defun maze/random-choice (items)
-  "Straight from the Rosetta Code"
-  (let* ((size (length items))
-         (index (random size)))
-    (nth index items)))
+  (if items
+      (let ((size (length items)))
+        (nth (cl-random size maze/random-state)
+             items))))
 
 (defun maze/utils--unoccupied-cells (maze exclusion-table)
   (--filter (not (gethash it exclusion-table))
