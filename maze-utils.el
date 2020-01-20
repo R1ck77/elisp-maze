@@ -13,8 +13,7 @@
   (declare (indent defun))
   (let ((index (make-symbol "index"))
         (tmp (make-symbol "tmp")))
-    `(-each (number-sequence 0 (1- (* (maze-rows ,maze)
-                                      (maze-columns ,maze))))
+    `(-each (maze/all-indices ,maze)
        (lambda (index)
          (let ((,tmp (maze/index-to-position ,maze index)))
            (let ((column (car ,tmp))
@@ -40,8 +39,7 @@
              items))))
 
 (defun maze/utils--unoccupied-cells (maze exclusion-table)
-  (--filter (not (gethash it exclusion-table))
-            (number-sequence 0 (1- (maze/get-cells-number maze)))))
+  (--filter (not (gethash it exclusion-table)) (maze/all-indices maze)))
 
 (defun maze/random-cell (maze &optional exclusion-table)
   (maze/random-choice

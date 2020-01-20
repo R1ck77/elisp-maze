@@ -1,6 +1,5 @@
 (require 'cl)
 (require 'dash)
-;;;; missing tests
 
 (cl-defstruct maze rows columns connections)
 
@@ -31,7 +30,6 @@
     (if error-string
         (error error-string))))
 
-;;; TODO/FIXME Bad interface. Change to (maze pos)
 (defun maze/position-to-index (maze position)
   "Convers a position (column row) to an index"
   (let ((column (car position))
@@ -61,7 +59,6 @@
       (cons to from)
     (cons from to)))
 
-;;; TODO/FIXME very slow: a mutating version of the maze is probably required
 (defun maze/carve-passage (maze from to)
   "Create a copy of the current maze with a new passage carved in
 
@@ -83,7 +80,6 @@ Throws if the from and to cells are not neighbors"
                       (maze/index-to-position maze from-index)
                       (maze/index-to-position maze to-index)))
 
-;;; TODO/FIXME test
 (defun maze/carve-path (maze cells)
   (let ((new-maze maze))
     (--each (-partition-in-steps 2 1 cells)
@@ -93,5 +89,8 @@ Throws if the from and to cells are not neighbors"
 (defun maze/get-cells-number (maze)
   (* (maze-columns maze)
      (maze-rows maze)))
+
+(defun maze/all-indices (maze)
+  (number-sequence 0 (1- (maze/get-cells-number maze))))
 
 (provide 'maze-data)

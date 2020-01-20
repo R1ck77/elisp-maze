@@ -47,4 +47,29 @@
     (it "throws an error if the cells are not contiguous"
       (expect (maze/carve-passage empty-maze '(0 2) '(2 2)) :to-throw 'error)
       (expect (maze/carve-passage empty-maze '(1 1) '(1 3)) :to-throw 'error)
-      (expect (maze/carve-passage empty-maze '(1 2) '(2 3)) :to-throw 'error))))
+      (expect (maze/carve-passage empty-maze '(1 2) '(2 3)) :to-throw 'error)))
+  (describe "maze/carve-path"
+    (it "returns the original unchanged maze if the path is empty"
+      (expect (maze/carve-path empty-maze '())
+              :to-be empty-maze))
+    (it "does nothing if the path has a single cell"
+      (expect (maze/carve-path empty-maze '())
+              :to-be empty-maze))
+    (it "carves a single path leg if the node list has 2 elements"
+      (let ((new-maze (maze/carve-path empty-maze '(3 4))))
+        (expect (hash-table-count (maze-connections new-maze))
+                :to-be 1)
+        (expect (gethash '(3 . 4) (maze-connections new-maze)))))
+    (it "carves two path legs if the node list has 3 elements"
+      (let ((new-maze (maze/carve-path empty-maze '(3 4 5))))
+        (expect (hash-table-count (maze-connections new-maze))
+                :to-be 2)
+        (expect (gethash '(3 . 4) (maze-connections new-maze)))
+        (expect (gethash '(4 . 5) (maze-connections new-maze)))))
+    (it "throws an error for non consecutive cells"
+      (expect (maze/carve-path empty-maze '(3 5))
+              :to-throw 'error)))
+  (describe "maze/all-indices"
+    (it "returns a sequence of all indices from 0 to the maximum index of a cell"
+      (expect (maze/all-indices empty-maze)
+              :to-equal (number-sequence 0 27)))))

@@ -12,12 +12,16 @@
      (> occupied 0))))
 
 ;;; TODO/FIXME not lazy…
+(defun maze/hk--first-valid-starting-point (maze used-cells-table)
+  (first
+   (--filter (maze/hk--valid-starting-point maze used-cells-table it)
+                                         (maze/all-indices maze))))
+
 (defun maze/hk--hunt (maze used-cells-table)
   "Return a cons of a new starting cell followed by an occupied cell to start from"
-  (let ((starting-point (first (--filter (maze/hk--valid-starting-point maze used-cells-table it)
-                                         (number-sequence 0 (1- (maze/get-cells-number maze)))))))
-    (if starting-point
-        (cons starting-point (maze/random-choice (maze/hk--occupied-neighbors used-cells-table starting-point))))))
+  (let ((starting-point (maze/hk--first-valid-starting-point maze used-cells-table)))
+    (when starting-point
+      (cons starting-point (maze/random-choice (maze/hk--occupied-neighbors used-cells-table starting-point))))))
 
 
 (defun maze/hk--stop-f (maze current-index next-candidate)
