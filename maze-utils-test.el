@@ -79,4 +79,11 @@
              (result (maze/until (= counter 5)
                        (setq counter (1+ counter))
                        (+ counter 12))))
-        (expect result :to-be 17)))))
+        (expect result :to-be 17))))
+  (describe "maze/comment"
+    (it "can be used without arguments"
+      (expect (maze/comment) :not :to-throw 'error))
+    (it "just ignores whatever put into it, as long as it's valid syntax"
+      (spy-on 'print)
+      (maze/comment (print "a") (print "b"))
+      (expect 'print :not :to-have-been-called))))

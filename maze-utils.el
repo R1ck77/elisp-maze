@@ -1,6 +1,6 @@
 (require 'maze-data)
 
-(defmacro comment (&rest forms)) ; TODO/FIXME tests?
+(defmacro maze/comment (&rest forms))
 
 (defconst maze/random-state (cl-make-random-state t)
   "The random state used to generate the mazes")
