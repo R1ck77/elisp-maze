@@ -7,15 +7,14 @@
 
 (defun maze/hk--valid-starting-point (maze used-cells-table cell-index)
   (if (not (gethash cell-index used-cells-table))
-   (let*  ((neighbors (maze/valid-neighbors maze (maze/index-to-position maze cell-index)))
+   (let* ((neighbors (maze/valid-neighbors maze (maze/index-to-position maze cell-index)))
            (occupied (length (--filter (gethash (maze/position-to-index maze it) used-cells-table) neighbors))))
      (> occupied 0))))
 
-;;; TODO/FIXME not lazy…
 (defun maze/hk--first-valid-starting-point (maze used-cells-table)
-  (first
-   (--filter (maze/hk--valid-starting-point maze used-cells-table it)
-                                         (maze/all-indices maze))))
+  (car
+   (--drop-while (not (maze/hk--valid-starting-point maze used-cells-table it))
+                 (maze/all-indices maze))))
 
 (defun maze/hk--hunt (maze used-cells-table)
   "Return a cons of a new starting cell followed by an occupied cell to start from"
@@ -42,7 +41,8 @@
         (--filter (maze/hk--is-index-unvisited? it used-cells-table all-generated-cells-table)
                   neighbor-indexes)))
 
-(defun maze/hk--next-unused-cell (maze current-index used-cells-table all-generated-cells-table)
+(defun maze/hk--next-unused-cell! (maze current-index used-cells-table all-generated-cells-table)
+  "Changes the content of all-generated-cells-table"
   (let* ((valid-next-indices (maze/hk--valid-path-moves maze current-index used-cells-table all-generated-cells-table))
          (selected-index (maze/random-choice valid-next-indices)))
     (when selected-index
@@ -53,33 +53,34 @@
   (lexical-let ((used-cells-table used-cells-table)
                 (all-generated-cells-table (make-hash-table)))
     (lambda (maze current-index)
-      (maze/hk--next-unused-cell maze current-index
-                                 used-cells-table
-                                 all-generated-cells-table))))
+      (maze/hk--next-unused-cell! maze current-index
+                                  used-cells-table
+                                  all-generated-cells-table))))
 
-;;; TODO/FIXME side effects everywhere
-(defun maze/hk--carve-hunt-and-kill (maze)
-  (let ((new-maze maze)
-        (maze-size (maze/get-cells-number maze))
-        (used-cells-table (make-hash-table))
-        (start-cell 0))
-    (let ((next-index-f (maze/hk--next-path-cell-function-generator used-cells-table)))
-      (while (< (hash-table-count used-cells-table)
-                (maze/get-cells-number new-maze))
-        (puthash start-cell t used-cells-table)
-        ;;; TODO/FIXME this whole module is a thing of nightmare
-        (let ((new-path (maze/create-path new-maze start-cell #'maze/hk--stop-f next-index-f)))
-          (--each new-path (puthash it t used-cells-table))
-          (setq new-maze (maze/carve-path new-maze new-path))
-          (setq start-previous (maze/hk--hunt new-maze used-cells-table)) ;;; TODO/FIXME inverted condition
-          (when start-previous
-            (setq new-maze (maze/carve-passage-index new-maze (car start-previous) (cdr start-previous)))
-            (setq start-cell (car start-previous)))
-          )))
-    new-maze))
+(defun maze/hk--has-unvisited-cells? (maze visited-cells-table)
+  (< (hash-table-count visited-cells-table)
+     (maze/get-cells-number maze)))
+
+(defun maze/hk--carve-path! (maze visited-cells-table new-path)
+  "Modifies visited-cells-table, and returns a new maze"
+  (--each new-path (puthash it t visited-cells-table))
+  (maze/carve-path maze new-path))
+
+(defun maze/hk--carve-hunt-and-kill (new-maze used-cells-table start-cell)
+  (let ((next-index-f (maze/hk--next-path-cell-function-generator used-cells-table)))
+    (while (maze/hk--has-unvisited-cells? new-maze used-cells-table)
+      (puthash start-cell t used-cells-table)
+      (setq new-maze (maze/hk--carve-path! new-maze used-cells-table (maze/create-path new-maze start-cell #'maze/hk--stop-f next-index-f)))
+      (setq start-previous (maze/hk--hunt new-maze used-cells-table))
+      (when start-previous
+        (setq new-maze (maze/carve-passage-index new-maze (car start-previous) (cdr start-previous)))
+        (setq start-cell (car start-previous)))))
+  new-maze)
 
 (defun maze/hunt-and-kill (columns rows)
-  (maze/hk--carve-hunt-and-kill (maze/create-empty columns rows)))
+  (let ((empty-maze (maze/create-empty columns rows))
+        (empty-used-cells-table (make-hash-table)))
+    (maze/hk--carve-hunt-and-kill empty-maze empty-used-cells-table 0)))
 
 (provide 'maze-hunt-and-kill)
         
