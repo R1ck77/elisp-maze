@@ -2,7 +2,7 @@
 (require 'maze-wilson)
 (require 'maze-hunt-and-kill)
 (require 'maze-ascii)
-(require 'maze-walk)
+(require 'maze-border-walk)
 
 (defun maze/insert (maze)
   (insert (maze/to-ASCII maze))
@@ -42,6 +42,6 @@
 
 (defun maze/border-walk (steps-per-second)
   (interactive "P")
-  (maze/walk-border-walk (/ 1.0 (or steps-per-second 10))))
+  (maze/border-walk (/ 1.0 (or steps-per-second 10))))
 
 (provide 'maze)
