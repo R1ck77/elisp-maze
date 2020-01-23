@@ -45,4 +45,8 @@
   (interactive "P")
   (maze/walk-border-walk (/ 1.0 (or steps-per-second 10))))
 
+(defun maze/dijkstra ()
+  (interactive)
+  (maze/dij-compute-dijkstra (point)))
+
 (provide 'maze)
