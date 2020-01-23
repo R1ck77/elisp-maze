@@ -2,6 +2,7 @@
 (require 'maze-wilson)
 (require 'maze-hunt-and-kill)
 (require 'maze-ascii)
+(require 'maze-random-walk)
 (require 'maze-border-walk)
 
 (defun maze/insert (maze)
