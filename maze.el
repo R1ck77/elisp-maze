@@ -43,6 +43,6 @@
 
 (defun maze/border-walk (steps-per-second)
   (interactive "P")
-  (maze/border-walk (/ 1.0 (or steps-per-second 10))))
+  (maze/walk-border-walk (/ 1.0 (or steps-per-second 10))))
 
 (provide 'maze)

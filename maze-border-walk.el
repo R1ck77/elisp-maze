@@ -58,7 +58,7 @@
   (equal (maze--border-state-direction-move border-walk-state-a)
          (maze--border-state-direction-move border-walk-state-b)))
 
-(defun maze/border-walk (delay)
+(defun maze/walk-border-walk (delay)
   "Walk the maze always keeping a hand on the wall"
   (let* ((first-state (maze/border--make-first-state (maze/border--next-move nil))))
     (setq state first-state)
