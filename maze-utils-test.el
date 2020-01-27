@@ -1,13 +1,42 @@
 (require 'maze-utils)
 (require 'buttercup)
 
+(setq lexical-binding t)
+
 (defun create-set-with (integers)
   (let ((table (make-hash-table)))
     (--each integers
       (puthash it t table))
     table))
 
+(defmacro update--calls (value)
+  "Non-hygienic macro"
+  `(lambda ()
+     (setq calls (cons ,value calls))))
+
 (describe "maze-utils"
+  (describe "maze/with-undo-disabled"
+    (it "invokes buffer-disable-undo before the forms and buffer-enable-undo after"
+      (let ((calls))
+        (spy-on 'buffer-disable-undo
+                :and-call-fake (update--calls :disable))
+        (spy-on 'buffer-enable-undo
+                :and-call-fake (update--calls :enable))
+        (maze/with-undo-disabled
+          (funcall (update--calls :forms)))
+        (expect calls :to-equal '(:enable :forms :disable))))
+    (it "buffers are disabled and enabled even in case of error"
+      (let ((calls))
+        (spy-on 'buffer-disable-undo
+                :and-call-fake (update--calls :disable))
+        (spy-on 'buffer-enable-undo
+                :and-call-fake (update--calls :enable))
+        (expect
+         (maze/with-undo-disabled
+           (funcall (update--calls :forms))
+           (error "something"))
+         :to-throw 'error)
+        (expect calls :to-equal '(:enable :forms :disable)))))
   (describe "maze/random-cell"
     (it "returns the last non occupied cell"
       (let ((exclusion-table (create-set-with (number-sequence 0 399))))

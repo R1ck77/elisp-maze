@@ -2,6 +2,20 @@
 
 (defmacro maze/comment (&rest forms))
 
+(defmacro maze/with-undo-disabled (&rest forms)
+  (declare (indent defun)
+           (debug t))
+  (let ((error-var (make-symbol "error-var")))
+    `(progn
+       (buffer-disable-undo)
+       (condition-case ,error-var
+           (progn
+             ,@forms
+             (buffer-enable-undo))
+         (error (progn
+                  (buffer-enable-undo)
+                  (signal (car ,error-var) (cdr ,error-var))))))))
+
 (defconst maze/random-state (cl-make-random-state t)
   "The random state used to generate the mazes")
 
