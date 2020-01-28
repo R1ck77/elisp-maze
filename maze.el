@@ -4,6 +4,7 @@
 (require 'maze-ascii)
 (require 'maze-random-walk)
 (require 'maze-border-walk)
+(require 'maze-dijkstra)
 
 (defun maze/insert (maze)
   (insert (maze/to-ASCII maze))
