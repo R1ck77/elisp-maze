@@ -150,10 +150,11 @@ Returns a list of cells with at least one cell."
 (defun maze/hash-table-to-list (table)
   "Return a list of (k . v) cons cells from a table"
   ;;; TODO/FIXME potential for optimization using destructive operations
-  (let ((result))
-    (maphash (lambda (k v)
-               (setq result (cons (cons k v) result)))
-             table)
-    result))
+  (if (hash-table-p table)
+      (let ((result))
+        (maphash (lambda (k v)
+                   (setq result (cons (cons k v) result)))
+                 table)
+        result)))
 
 (provide 'maze-utils)
