@@ -92,7 +92,7 @@ Update the data structures"
 
 (defun maze/dij-debug-mark-with-color (index color)
   (put-text-property index (1+ index)
-                     'font-lock-face (list :background color)))
+                     'face (list :background color)))
 
 (defun maze/dij-debug-mark-all-with-color (indices color)
   (maphash (lambda (it unused) (maze/dij-debug-mark-with-color it color)) indices)
