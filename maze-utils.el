@@ -16,6 +16,25 @@
                   (buffer-enable-undo)
                   (signal (car ,error-var) (cdr ,error-var))))))))
 
+;;; TODO/FIXME tests?
+(defmacro maze/time-this (callback &rest forms)
+  (declare (indent defun)
+           (debug t))
+    (let ((start-time (make-symbol "start-time"))
+        (result (make-symbol "result")))
+    `(let* ((,start-time (float-time))
+            (,result (progn ,@forms)))
+       (funcall ,callback (- (float-time) ,start-time))
+       ,result)))
+
+;;; TODO/FIXME tests?
+(defmacro maze/time-print-this (&rest forms)
+  (declare (indent defun)
+           (debug t))
+  `(maze/time-this (lambda (dt)
+                     (message "Time required: %s" dt))
+                   ,@forms))
+
 (defconst maze/random-state (cl-make-random-state t)
   "The random state used to generate the mazes")
 
