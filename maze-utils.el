@@ -1,4 +1,5 @@
 (require 'maze-data)
+(require 'maze-map)
 
 (defmacro maze/comment (&rest forms))
 
@@ -72,11 +73,11 @@
              items))))
 
 (defun maze/utils--unoccupied-cells (maze exclusion-table)
-  (--filter (not (gethash it exclusion-table)) (maze/all-indices maze)))
+  (--filter (not (maze/map-get it exclusion-table)) (maze/all-indices maze)))
 
 (defun maze/random-cell (maze &optional exclusion-table)
   (maze/random-choice
-   (maze/utils--unoccupied-cells maze (or exclusion-table (make-hash-table)))))
+   (maze/utils--unoccupied-cells maze (or exclusion-table (map/map-create)))))
 
 (defun maze/left-cell (column row)
   (list (1- column) row))

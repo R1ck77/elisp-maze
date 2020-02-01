@@ -10,10 +10,11 @@
   scored
   current)
 
+
 (defun maze/dij-new-state (current)
-  (let ((scored (make-hash-table)))
-    (puthash current 0 scored)
-    (make-maze-dij-state :visited (make-hash-table)
+  (let ((scored (maze/map-create)))
+    (maze/map-put current 0 scored)
+    (make-maze-dij-state :visited (maze/map-create)
                          :scored scored
                          :current current)))
 
@@ -27,19 +28,19 @@
   (message (or format "%s") (maze/dij-format-state state)))
 
 (defun maze/dij-frontier-present? (state)
-  (/= (hash-table-count (maze-dij-state-scored state)) 0))
+  (/= (maze/map-count (maze-dij-state-scored state)) 0))
 
 (defun maze/dij-get-frontier (state)
   (maze/hash-table-to-list (maze-dij-state-scored state)))
 
 (defun maze/dij-update-current (state new-current)
-  (make-maze-dij-state :visited (copy-hash-table (maze-dij-state-visited state))
-                       :scored (copy-hash-table (maze-dij-state-scored state))
+  (make-maze-dij-state :visited (maze/map-copy (maze-dij-state-visited state))
+                       :scored (maze/map-copy (maze-dij-state-scored state))
                        :current new-current))
 
 (defun maze/dij-copy-state (state)
-  (make-maze-dij-state :visited (copy-hash-table (maze-dij-state-visited state))
-                       :scored (copy-hash-table (maze-dij-state-scored state))
+  (make-maze-dij-state :visited (maze/map-copy (maze-dij-state-visited state))
+                       :scored (maze/map-copy (maze-dij-state-scored state))
                        :current (maze-dij-state-current state)))
 
 (defun maze/dij-state-visit-current (state)
@@ -49,14 +50,14 @@ Update the data structures"
   (let ((new-state (maze/dij-copy-state state))
         (current (maze-dij-state-current state)))
     (let ((scored-neighbors (maze-dij-state-scored new-state)))
-      (let ((score (gethash current scored-neighbors)))
-        (puthash current score (maze-dij-state-visited new-state))
-        (remhash current scored-neighbors)))
+      (let ((score (maze/map-get current scored-neighbors)))
+        (maze/map-put current score (maze-dij-state-visited new-state))
+        (maze/map-del current scored-neighbors)))
     new-state))
 
 (defun  maze/dij-state-get-current-score (state)
   (let ((current (maze-dij-state-current state)))
-    (gethash current (maze-dij-state-visited state))))
+    (maze/map-get current (maze-dij-state-visited state))))
 
 (cl-defstruct maze-dij-property
   visited
@@ -74,7 +75,7 @@ Update the data structures"
           current-property))
     (maze/dij-set-score score-candidate)))
 
-(defun maze/dij--get-property (point)
+(defun maze/map-get-property (point)
   (get-text-property point maze/dij-property-name))
 
 (defun maze/dij-set-property (index property)
@@ -88,28 +89,29 @@ Update the data structures"
 
 (defun maze/dij-score-at-point (point)
   "nil means infinite"
-  (maze/dij--score-from-property (maze/dij--get-property point)))
+  (maze/dij--score-from-property (maze/map-get-property point)))
 
 (defun maze/dij-debug-mark-with-color (index color)
   (put-text-property index (1+ index)
                      'face (list :background color)))
 
 (defun maze/dij-debug-mark-all-with-color (indices color)
-  (maphash (lambda (it unused) (maze/dij-debug-mark-with-color it color)) indices)
+  (maze/map-iterate (lambda (it unused)
+                      (maze/dij-debug-mark-with-color it color)) indices)
   (redisplay))
 
 (defun maze/dij--update-score-at-point (index other-score)
-  (let ((new-property (maze/dij-update-maze-score (maze/dij--get-property index)
+  (let ((new-property (maze/dij-update-maze-score (maze/map-get-property index)
                                                   (1+ other-score))))
     (maze/dij-set-property index new-property)
     new-property))
 
 (defun maze/dij--unvisited-neighbors (point visited-positions)
-  (--filter (not (gethash it visited-positions)) (maze/walk-available-positions point)))
+  (--filter (not (maze/map-get it visited-positions)) (maze/walk-available-positions point)))
 
 (defun maze/dij--set-new-score-on-neighbor! (mutable-state current-score neighbor)
   (let ((new-property (maze/dij--update-score-at-point neighbor current-score)))    
-    (puthash neighbor (maze/dij--score-from-property new-property) (maze-dij-state-scored mutable-state))))
+    (maze/map-put neighbor (maze/dij--score-from-property new-property) (maze-dij-state-scored mutable-state))))
 
 (defun maze/dij--score-neighbors (state)
   (let ((unvisited-neighbors (maze/dij--unvisited-neighbors (maze-dij-state-current state) (maze-dij-state-visited state)))
