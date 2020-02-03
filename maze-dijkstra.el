@@ -8,6 +8,9 @@
 ;;; Use a functional (but slow approach, due to GC) in handling the state
 (defvar maze/dij-immutable-state nil)
 
+;;; Show the algorithm as it recurses the maze. VERY slow
+(defconst maze/dij-debug-progression nil)
+
 (defun maze/dij-copy-state (state)
   (make-maze-dij-state :visited (maze/map-copy (maze-dij-state-visited state))
                        :scored (maze/map-copy (maze-dij-state-scored state))
@@ -171,7 +174,13 @@ Throws if both values are :inf, as this situation should never happen"
                            (maze/dij--select-next-node-from-list (maze/dij-get-frontier state))))
 
 (defun current-score-hook ()
-  (message "Score: %s" (or (maze/dij-score-at-point (point)) :inf)))
+  (message "Score: %s" (or (maze/dij-score-at-point (maze/map-get-current-id (point))
+                                                    (point)) :inf)))
+
+(defun maze/dij--debug-draw (state)
+  (when maze/dij-debug-progression
+    (maze/dij-debug-mark-all-with-color (maze-dij-state-visited state) "blue")
+    (maze/dij-debug-mark-all-with-color (maze-dij-state-scored state) "dark grey")))
 
 (defun maze/dij-compute-dijkstra (start)
   (buffer-disable-undo)
@@ -179,11 +188,10 @@ Throws if both values are :inf, as this situation should never happen"
         (state (maze/dij-new-state start)))
     (while (maze/dij-frontier-present? state)
       (setq state (maze/dij--select-next-node state))
-      (maze/dij-debug-mark-all-with-color (maze-dij-state-visited state) "blue")
-      (maze/dij-debug-mark-all-with-color (maze-dij-state-scored state) "dark grey")
-      (maze/dij-debug-mark-with-color (maze-dij-state-current state) "red")
+      (maze/dij--debug-draw state)
       (setq state (maze/dij--score-neighbors id state))
       (setq state (maze/dij--mark-current-visited id state)))
+    (maze/dij-debug-mark-with-color (maze-dij-state-current state) "red")
     (message "Dijkstra algorithm terminated"))
   (buffer-enable-undo))
 

@@ -45,7 +45,6 @@
       (setq state (maze/dijb-next-state state))
       (when state
         (maze/dij-debug-mark-with-color (maze-dijb-state-current state) maze-dijb-color)
-        (sleep-for 0.01)
         (redisplay)))))
 
 (provide 'maze-dijkstra-backtrack)
