@@ -5,11 +5,24 @@
 
 (defconst maze/dij-property-name :maze-dijkstra)
 
+;;; Use a functional (but slow approach, due to GC) in handling the state
+(defvar maze/dij-immutable-state t)
+
+(defun maze/dij-copy-state (state)
+  (make-maze-dij-state :visited (maze/map-copy (maze-dij-state-visited state))
+                       :scored (maze/map-copy (maze-dij-state-scored state))
+                       :current (maze-dij-state-current state)))
+
+(defun maze/dij--optional-copy-state (state)
+  "Copy or return the same state, depending on the approach defined in maze/dij-immutable-state"
+  (if maze/dij-immutable-state
+      (maze/dij-copy-state state)
+    state))
+
 (cl-defstruct maze-dij-state
   visited
   scored
   current)
-
 
 (defun maze/dij-new-state (current)
   (let ((scored (maze/map-create)))
@@ -34,20 +47,15 @@
   (maze/hash-table-to-list (maze-dij-state-scored state)))
 
 (defun maze/dij-update-current (state new-current)
-  (make-maze-dij-state :visited (maze/map-copy (maze-dij-state-visited state))
-                       :scored (maze/map-copy (maze-dij-state-scored state))
-                       :current new-current))
-
-(defun maze/dij-copy-state (state)
-  (make-maze-dij-state :visited (maze/map-copy (maze-dij-state-visited state))
-                       :scored (maze/map-copy (maze-dij-state-scored state))
-                       :current (maze-dij-state-current state)))
+  (let ((new-state (maze/dij--optional-copy-state state)))
+    (setf (maze-dij-state-current new-state) new-current)
+    new-state))
 
 (defun maze/dij-state-visit-current (state)
   "End of the current neighbors evaluation: mark the current index
 
 Update the data structures"
-  (let ((new-state (maze/dij-copy-state state))
+  (let ((new-state (maze/dij--optional-copy-state state))
         (current (maze-dij-state-current state)))
     (let ((scored-neighbors (maze-dij-state-scored new-state)))
       (let ((score (maze/map-get current scored-neighbors)))
@@ -116,7 +124,7 @@ Update the data structures"
 (defun maze/dij--score-neighbors (state)
   (let ((unvisited-neighbors (maze/dij--unvisited-neighbors (maze-dij-state-current state) (maze-dij-state-visited state)))
         (this-score (or (maze/dij-score-at-point (maze-dij-state-current state)) 0))
-        (new-state (maze/dij-copy-state state)))
+        (new-state (maze/dij--optional-copy-state state)))
     (--each unvisited-neighbors (maze/dij--set-new-score-on-neighbor! new-state this-score it))
     new-state))
 
