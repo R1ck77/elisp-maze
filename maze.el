@@ -5,6 +5,7 @@
 (require 'maze-random-walk)
 (require 'maze-border-walk)
 (require 'maze-dijkstra)
+(require 'maze-dijkstra-backtrack)
 
 (defun maze/insert (maze)
   (insert (maze/to-ASCII maze))
@@ -45,6 +46,10 @@
 (defun maze/border-walk (steps-per-second)
   (interactive "P")
   (maze/walk-border-walk (/ 1.0 (or steps-per-second 10))))
+
+(defun maze/find-long-path ()
+  (interactive)
+  (maze/dijb-find-long-path))
 
 (defun maze/dijkstra ()
   (interactive)

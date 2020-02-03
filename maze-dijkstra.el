@@ -194,7 +194,8 @@ Throws if both values are :inf, as this situation should never happen"
     state))
 
 (defun maze/dij-compute-dijkstra (start)
-  (let ((last-state (maze/dij-compute-dijkstra-for-result start)))
+  (let* ((maze/dij-debug-progression t)
+         (last-state (maze/dij-compute-dijkstra-for-result start)))
     (maze/dij-debug-mark-with-color (maze-dij-state-current last-state) "red"))
   (message "Dijkstra algorithm terminated"))
 
