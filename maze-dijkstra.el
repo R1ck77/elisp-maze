@@ -6,7 +6,7 @@
 (defconst maze/dij-property-name :maze-dijkstra)
 
 ;;; Use a functional (but slow approach, due to GC) in handling the state
-(defvar maze/dij-immutable-state t)
+(defvar maze/dij-immutable-state nil)
 
 (defun maze/dij-copy-state (state)
   (make-maze-dij-state :visited (maze/map-copy (maze-dij-state-visited state))
@@ -69,35 +69,45 @@ Update the data structures"
 
 (cl-defstruct maze-dij-property
   visited
-  score)
+  score
+  id)
 
-(defun maze/dij-set-score (score)
+(defun maze/dij-set-score (id score)
   (make-maze-dij-property :visited nil
-                          :score score))
+                          :score score
+                          :id id))
 
-(defun maze/dij-update-maze-score (current-property score-candidate)
+(defun maze/dij-update-maze-score (id current-property score-candidate)
   (if current-property
       (let ((old-score (maze-dij-property-score current-property)))
         (if (< score-candidate old-score)
-            (maze/dij-set-score score-candidate)
+            (maze/dij-set-score id score-candidate)
           current-property))
-    (maze/dij-set-score score-candidate)))
+    (maze/dij-set-score id score-candidate)))
 
-(defun maze/map-get-property (point)
+(defun maze/map--get-property (point)
   (get-text-property point maze/dij-property-name))
+
+(defun maze/map-get-current-id (point)
+  (maze-dij-property-id (maze/map--get-property point)))
+
+(defun maze/map-safe-get-property (id point)
+  (let ((property (maze/map--get-property point)))
+    (if (and property (eq id (maze-dij-property-id property)))
+        property)))
 
 (defun maze/dij-set-property (index property)
   (put-text-property index (1+ index)
                      maze/dij-property-name property))
 
-(defun maze/dij--score-from-property (property)
+(defun maze/dij--score-from-property (id property)
   "nil means infinite"
-  (if property
+  (if property 
       (maze-dij-property-score property)))
 
-(defun maze/dij-score-at-point (point)
+(defun maze/dij-score-at-point (id point)
   "nil means infinite"
-  (maze/dij--score-from-property (maze/map-get-property point)))
+  (maze/dij--score-from-property id (maze/map-safe-get-property id point)))
 
 (defun maze/dij-debug-mark-with-color (index color)
   (put-text-property index (1+ index)
@@ -108,8 +118,9 @@ Update the data structures"
                       (maze/dij-debug-mark-with-color it color)) indices)
   (redisplay))
 
-(defun maze/dij--update-score-at-point (index other-score)
-  (let ((new-property (maze/dij-update-maze-score (maze/map-get-property index)
+(defun maze/dij--update-score-at-point (id index other-score)
+  (let ((new-property (maze/dij-update-maze-score id
+                                                  (maze/map-safe-get-property id index)
                                                   (1+ other-score))))
     (maze/dij-set-property index new-property)
     new-property))
@@ -117,25 +128,26 @@ Update the data structures"
 (defun maze/dij--unvisited-neighbors (point visited-positions)
   (--filter (not (maze/map-get it visited-positions)) (maze/walk-available-positions point)))
 
-(defun maze/dij--set-new-score-on-neighbor! (mutable-state current-score neighbor)
-  (let ((new-property (maze/dij--update-score-at-point neighbor current-score)))    
-    (maze/map-put neighbor (maze/dij--score-from-property new-property) (maze-dij-state-scored mutable-state))))
+(defun maze/dij--set-new-score-on-neighbor! (id mutable-state current-score neighbor)
+  (let ((new-property (maze/dij--update-score-at-point id neighbor current-score)))    
+    (maze/map-put neighbor (maze/dij--score-from-property id new-property) (maze-dij-state-scored mutable-state))))
 
-(defun maze/dij--score-neighbors (state)
+(defun maze/dij--score-neighbors (id state)
   (let ((unvisited-neighbors (maze/dij--unvisited-neighbors (maze-dij-state-current state) (maze-dij-state-visited state)))
-        (this-score (or (maze/dij-score-at-point (maze-dij-state-current state)) 0))
+        (this-score (or (maze/dij-score-at-point id (maze-dij-state-current state)) 0))
         (new-state (maze/dij--optional-copy-state state)))
-    (--each unvisited-neighbors (maze/dij--set-new-score-on-neighbor! new-state this-score it))
+    (--each unvisited-neighbors (maze/dij--set-new-score-on-neighbor! id new-state this-score it))
     new-state))
 
-(defun maze/dij-create-visited (score)
+(defun maze/dij-create-visited (id score)
   (make-maze-dij-property :visited t
-                          :score score))
+                          :score score
+                          :id id))
 
-(defun maze/dij--mark-current-visited (state)
+(defun maze/dij--mark-current-visited (id state)
   (let ((new-state (maze/dij-state-visit-current state)))
     (maze/dij-set-property (maze-dij-state-current new-state)
-                           (maze/dij-create-visited (maze/dij-state-get-current-score new-state)))
+                           (maze/dij-create-visited id (maze/dij-state-get-current-score new-state)))
     new-state))
 
 (defun maze/dij--compare-score (a b)
@@ -163,14 +175,15 @@ Throws if both values are :inf, as this situation should never happen"
 
 (defun maze/dij-compute-dijkstra (start)
   (buffer-disable-undo)
-  (let ((state (maze/dij-new-state start)))
+  (let ((id start)
+        (state (maze/dij-new-state start)))
     (while (maze/dij-frontier-present? state)
       (setq state (maze/dij--select-next-node state))
       (maze/dij-debug-mark-all-with-color (maze-dij-state-visited state) "blue")
       (maze/dij-debug-mark-all-with-color (maze-dij-state-scored state) "dark grey")
       (maze/dij-debug-mark-with-color (maze-dij-state-current state) "red")
-      (setq state (maze/dij--score-neighbors state))
-      (setq state (maze/dij--mark-current-visited state)))
+      (setq state (maze/dij--score-neighbors id state))
+      (setq state (maze/dij--mark-current-visited id state)))
     (message "Dijkstra algorithm terminated"))
   (buffer-enable-undo))
 

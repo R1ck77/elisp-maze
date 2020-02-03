@@ -2,15 +2,17 @@
 
 (defconst maze-dijb-color "red")
 
-(cl-defstruct maze-dijb-state current score)
+(cl-defstruct maze-dijb-state id current score)
 
-(defun maze/dijb-new-state (current score)
-  (make-maze-dijb-state :current current
+(defun maze/dijb-new-state (id current score)
+  (make-maze-dijb-state :id id
+                        :current current
                         :score score))
 
-(defun maze/dijb--get-scored-moves (index)
+;;; TODO/FIXME hic sunt leones
+(defun maze/dijb--get-scored-moves (id index)
   (-filter #'cdr
-           (--map (cons it (maze/dij-score-at-point it))
+           (--map (cons it (maze/dij-score-at-point id it))
                   (maze/walk-available-positions index))))
 
 (defun maze/dijb--compare-moves (comparator a-move another-move)
@@ -23,19 +25,22 @@
             (--filter (< (cdr it) current-score) scored-moves)))
 
 (defun maze/dijb-next-move-from-state (state)
-  (maze/dijb-next-move (maze/dijb--get-scored-moves (maze-dijb-state-current state))
+  (maze/dijb-next-move (maze/dijb--get-scored-moves (maze-dijb-state-id state)
+                                                    (maze-dijb-state-current state))
                        (maze-dijb-state-score state)))
 
 (defun maze/dijb-next-state (state)
   (let ((next-move (maze/dijb-next-move-from-state state)))
     (when next-move
-      (make-maze-dijb-state :current (car next-move )
+      (make-maze-dijb-state :id (maze-dijb-state-id state)
+                            :current (car next-move )
                             :score (cdr next-move)))))
 
 ;;; TODO/FIXME check for nil score at start!
 (defun maze/dijb-traceback (start)
   "Colorize the maze back to the starting point for the previously computed dijkstra score"
-  (let ((state (maze/dijb-new-state start (maze/dij-score-at-point start))))
+  (let* ((id (maze/map-get-current-id start))
+         (state (maze/dijb-new-state id start (maze/dij-score-at-point id start))))
     (maze/until (not state)
       (setq state (maze/dijb-next-state state))
       (when state
