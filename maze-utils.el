@@ -104,9 +104,7 @@ The list has the :top :right :bottom :left keys and can be queried with assq"
 (defun maze/valid-neighbors (maze position)
   "Returns an association list of valid neighbors for a specific coordinate
 
-position is in the form (column raw)
-
-The list has the :top :right :bottom :left keys and can be queried with assq"
+position is in the form (column raw)"
   (let ((column (car position))
         (row (cadr position)))
     (--filter (apply #'maze/valid-cell-p (list maze it))

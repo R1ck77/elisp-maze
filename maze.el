@@ -1,6 +1,7 @@
 (require 'maze-binary)
 (require 'maze-wilson)
 (require 'maze-hunt-and-kill)
+(require 'maze-recursive-backtracker)
 (require 'maze-ascii)
 (require 'maze-random-walk)
 (require 'maze-border-walk)
@@ -29,6 +30,11 @@
   (interactive "nRows? \nnColumns? ")
   (maze/debug--print-state)
   (maze/insert (maze/hunt-and-kill columns rows)))
+
+(defun maze/insert-recursive-backtracker (rows columns)
+  (interactive "nRows? \nnColumns? ")
+  (maze/debug--print-state)
+  (maze/insert (maze/recursive-backtracker columns rows)))
 
 (defun maze/interpret--delay-value (steps-per-second)
   (/ 1.0 (or steps-per-second 10)))
