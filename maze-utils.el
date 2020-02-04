@@ -77,7 +77,7 @@
 
 (defun maze/random-cell (maze &optional exclusion-table)
   (maze/random-choice
-   (maze/utils--unoccupied-cells maze (or exclusion-table (map/map-create)))))
+   (maze/utils--unoccupied-cells maze (or exclusion-table (maze/map-create)))))
 
 (defun maze/left-cell (column row)
   (list (1- column) row))
