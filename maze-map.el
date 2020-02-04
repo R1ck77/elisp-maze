@@ -2,8 +2,7 @@
   (make-hash-table))
 
 (defun maze/map-copy (table)
-                                        ;  (copy-hash-table table)
-  table  )
+  (copy-hash-table table))
 
 (defun maze/map-put (key value table)
   (puthash key value table))
