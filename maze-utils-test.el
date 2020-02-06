@@ -14,6 +14,8 @@
   `(lambda ()
      (setq calls (cons ,value calls))))
 
+(defun a-function (&rest args))
+
 (describe "maze-utils"
   (describe "maze/with-undo-disabled"
     (it "invokes buffer-disable-undo before the forms and buffer-enable-undo after"
@@ -115,4 +117,40 @@
     (it "just ignores whatever put into it, as long as it's valid syntax"
       (spy-on 'print)
       (maze/comment (print "a") (print "b"))
-      (expect 'print :not :to-have-been-called))))
+      (expect 'print :not :to-have-been-called)))
+  (describe "maze/time-this"
+    (it "executes the forms once"
+      (spy-on 'a-function)
+      (maze/time-this (lambda (dt))
+        (a-function 1)
+        (a-function 2 3))
+      (expect (spy-calls-all-args 'a-function)
+              :to-equal '((1) (2 3))))
+    (it "returns the value of the last form"
+      (expect (maze/time-this (lambda (dt))
+                (+ 10 20))
+              :to-be 30))
+    (it "invokes the callback for a time that's compatible with the time required to execute the forms"
+      (maze/time-this (lambda (dt)
+                        (expect dt :to-be-greater-than 0.01))
+        (sleep-for 0.01))))
+  (describe "maze/time-print-this"
+    (it "executes the forms once"
+      (spy-on 'message)
+      (spy-on 'a-function)
+      (maze/time-print-this
+        (a-function 1)
+        (a-function 2 3))
+      (expect (spy-calls-all-args 'a-function)
+              :to-equal '((1) (2 3))))
+    (it "returns the value of the last form"
+      (spy-on 'message)
+      (expect (maze/time-print-this
+                (+ 10 20))
+              :to-be 30))
+    (it "invokes message at least once "
+      (spy-on 'message)
+      (maze/time-print-this
+        (sleep-for 0.01))
+      (expect 'message :to-have-been-called-times 1))))
+

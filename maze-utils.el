@@ -17,7 +17,6 @@
                   (buffer-enable-undo)
                   (signal (car ,error-var) (cdr ,error-var))))))))
 
-;;; TODO/FIXME tests?
 (defmacro maze/time-this (callback &rest forms)
   (declare (indent defun)
            (debug t))
@@ -28,7 +27,6 @@
        (funcall ,callback (- (float-time) ,start-time))
        ,result)))
 
-;;; TODO/FIXME tests?
 (defmacro maze/time-print-this (&rest forms)
   (declare (indent defun)
            (debug t))
