@@ -14,7 +14,7 @@
          (maze/valid-neighbors maze (maze/index-to-position maze index))))
 
 (defun maze/rb--compute-valid-moves (valid-neighbors used-cells-indices)
-    (--filter (not (maze/map-get it  used-cells-indices)) valid-neighbors))
+    (--filter (not (maze/map-get it used-cells-indices)) valid-neighbors))
 
 (defun maze/rb--compute-valid-moves-from-maze (maze used-cells index)
   (maze/rb--compute-valid-moves (maze/rb--compute-valid-neighbors maze index)
@@ -26,7 +26,7 @@
 (defun maze/rb--compute-new-stack (maze used-cells stack)
   (--drop-while (not (maze/rb--compute-valid-moves-from-maze maze used-cells it)) stack))
 
-(defun maze/rb--backtrack! (maze state)
+(defun maze/rb--backtrack (maze state)
   (let ((stack (maze-rb-state-stack state))
         (used-cells (maze-rb-state-used-cells state)))
     (make-maze-rb-state :used-cells used-cells
@@ -41,16 +41,16 @@
 (defun maze/rb--carve-passage (maze positions)
   (maze/carve-passage maze (car positions) (cadr positions)))
 
-(defun maze/rb--next-move! (maze state)
+(defun maze/rb--next-move (maze state)
   (let ((next-index (maze/random-choice (maze/rb--valid-moves maze state))))
     (when next-index
       (maze/map-put next-index t (maze-rb-state-used-cells state))
       (maze/rb--push state next-index)
       (maze/rb--carve-passage maze (maze/rb--previous-leg maze state)))))
 
-(defun maze/rb--next-path! (maze state)
+(defun maze/rb--next-path (maze state)
   (let ((new-maze))
-    (while (setq new-maze (maze/rb--next-move! maze state))
+    (while (setq new-maze (maze/rb--next-move maze state))
       (setq maze new-maze))
     maze))
 
@@ -59,8 +59,8 @@
 
 (defun maze/rb--create-path (maze state)
   (while (not (maze/rb--empty-stack? state))
-    (setq maze (maze/rb--next-path! maze state))
-    (setq state (maze/rb--backtrack! maze state)))
+    (setq maze (maze/rb--next-path maze state))
+    (setq state (maze/rb--backtrack maze state)))
   maze)
 
 (defun maze/rb--create-state (start)
