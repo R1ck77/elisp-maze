@@ -37,8 +37,8 @@
 (defun maze/dij-format-state (state)
   (format "Current: %d\nVisited: %s\nScored: %s"
           (maze-dij-state-current state)
-          (maze/hash-table-to-list (maze-dij-state-visited state))
-          (maze/hash-table-to-list (maze-dij-state-scored state))))
+          (maze/map-to-list (maze-dij-state-visited state))
+          (maze/map-to-list (maze-dij-state-scored state))))
 
 (defun maze/dij-log-state (state &optional format)
   (message (or format "%s") (maze/dij-format-state state)))
@@ -47,7 +47,7 @@
   (/= (maze/map-count (maze-dij-state-scored state)) 0))
 
 (defun maze/dij-get-frontier (state)
-  (maze/hash-table-to-list (maze-dij-state-scored state)))
+  (maze/map-to-list (maze-dij-state-scored state)))
 
 (defun maze/dij-update-current (state new-current)
   (let ((new-state (maze/dij--optional-copy-state state)))

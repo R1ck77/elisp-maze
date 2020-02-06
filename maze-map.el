@@ -19,4 +19,17 @@
 (defun maze/map-iterate (f table)
   (maphash f table))
 
+(defun maze/map-to-list (table)
+  (maze/hash--table-to-list table))
+
+(defun maze/hash--table-to-list (table)
+  "Return a list of (k . v) cons cells from a table"
+  ;;; TODO/FIXME potential for optimization using destructive operations
+  (if (hash-table-p table)
+      (let ((result))
+        (maphash (lambda (k v)
+                   (setq result (cons (cons k v) result)))
+                 table)
+        result)))
+
 (provide 'maze-map)

@@ -162,15 +162,4 @@ Returns a list of cells with at least one cell."
                                                       (car seed) (cdr seed)))
                     (cons start nil))))
 
-;;; TODO/FIXME test
-(defun maze/hash-table-to-list (table)
-  "Return a list of (k . v) cons cells from a table"
-  ;;; TODO/FIXME potential for optimization using destructive operations
-  (if (hash-table-p table)
-      (let ((result))
-        (maphash (lambda (k v)
-                   (setq result (cons (cons k v) result)))
-                 table)
-        result)))
-
 (provide 'maze-utils)
