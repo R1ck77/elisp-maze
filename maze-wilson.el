@@ -1,4 +1,5 @@
 (require 'dash)
+(require 'maze-map)
 (require 'maze-data)
 (require 'maze-utils)
 
@@ -20,7 +21,7 @@
 (defun maze/wilson--generate-stop-f (used-cells)
   (lexical-let ((used-cells used-cells))
     (lambda (maze current-index next-candidate)
-      (if (gethash next-position used-cells)
+      (if (maze/map-get next-position used-cells)
           :last
         :continue))))
 
@@ -28,7 +29,7 @@
   "Return a path starting from path and ending in a used-cell
 
 start must not be in the used-cells list"
-  (if (gethash start used-cells)
+  (if (maze/map-get start used-cells)
       (error "Starting from an used cell!"))
   (maze/wilson-erase-loops (maze/create-path maze start
                                              (maze/wilson--generate-stop-f used-cells)
@@ -36,18 +37,18 @@ start must not be in the used-cells list"
 
 (defun maze/wilson--create-initial-exclusion-table (maze)
     (let ((maze-size (maze/get-cells-number maze))
-        (used-cells (make-hash-table)))
-    (puthash (/ maze-size 2) t used-cells)
+        (used-cells (maze/map-create)))
+    (maze/map-put (/ maze-size 2) t used-cells)
     used-cells))
 
 (defun maze/wilson--carve (maze)
   (let ((new-maze maze)
         (exclusion-table (maze/wilson--create-initial-exclusion-table maze))
         (maze-size (maze/get-cells-number maze)))
-    (maze/until (>= (hash-table-count exclusion-table) maze-size)
+    (maze/until (>= (maze/map-count exclusion-table) maze-size)
       (let ((new-path (maze/wilson--path new-maze exclusion-table (maze/random-cell new-maze exclusion-table))))
         (setq new-maze (maze/carve-path new-maze new-path))
-        (--each new-path (puthash it t exclusion-table))))
+        (--each new-path (maze/map-put it t exclusion-table))))
     new-maze))
 
 (defun maze/wilson (columns rows)

@@ -1,5 +1,5 @@
-(defun maze/map-create ()
-  (make-hash-table))
+(defun maze/map-create (&rest args)
+  (apply #'make-hash-table args))
 
 (defun maze/map-copy (table)
   (copy-hash-table table))

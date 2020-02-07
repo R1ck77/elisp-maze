@@ -1,3 +1,4 @@
+(require 'maze-map)
 (require 'maze-data)
 (require 'maze-utils)
 
@@ -24,11 +25,11 @@
 
 (defun maze/has-top-passage? (maze index)
   (let ((connection (cons (- index (maze-columns maze)) index)))
-    (gethash connection (maze-connections maze))))
+    (maze/map-get connection (maze-connections maze))))
 
 (defun maze/has-left-passage? (maze index)
   (let ((connection (cons (1- index) index)))
-    (gethash connection (maze-connections maze))))
+    (maze/map-get connection (maze-connections maze))))
 
 (defun maze/cell-to-ASCII (maze column row)
   (let ((this-index (maze/position-to-index maze (list column row))))

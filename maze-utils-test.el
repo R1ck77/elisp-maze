@@ -1,12 +1,13 @@
 (require 'maze-utils)
+(require 'maze-map)
 (require 'buttercup)
 
 (setq lexical-binding t)
 
 (defun create-set-with (integers)
-  (let ((table (make-hash-table)))
+  (let ((table (maze/map-create)))
     (--each integers
-      (puthash it t table))
+      (maze/map-put it t table))
     table))
 
 (defmacro update--calls (value)
@@ -42,7 +43,7 @@
   (describe "maze/random-cell"
     (it "returns the last non occupied cell"
       (let ((exclusion-table (create-set-with (number-sequence 0 399))))
-        (remhash 42 exclusion-table)
+        (maze/map-del 42 exclusion-table)
         (expect (maze/random-cell (maze/create-empty 20 20)
                                   exclusion-table)
                 :to-be 42)))

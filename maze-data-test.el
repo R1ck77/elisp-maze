@@ -1,4 +1,5 @@
 (require 'buttercup)
+(require 'maze-map)
 (require 'maze-data)
 
 (defconst empty-maze (maze/create-empty 7 4))
@@ -15,7 +16,7 @@
       (expect (maze-rows (maze/create-empty 13 7))
               :to-be 7))
     (it "creates a maze with no connections"
-      (expect (hash-table-count (maze-connections (maze/create-empty 100 20)))
+      (expect (maze/map-count (maze-connections (maze/create-empty 100 20)))
               :to-be 0)))
   (describe "maze/index-to-position"
     (it "throws if the index is out of range"
@@ -57,15 +58,15 @@
               :to-be empty-maze))
     (it "carves a single path leg if the node list has 2 elements"
       (let ((new-maze (maze/carve-path empty-maze '(3 4))))
-        (expect (hash-table-count (maze-connections new-maze))
+        (expect (maze/map-count (maze-connections new-maze))
                 :to-be 1)
-        (expect (gethash '(3 . 4) (maze-connections new-maze)))))
+        (expect (maze/map-get '(3 . 4) (maze-connections new-maze)))))
     (it "carves two path legs if the node list has 3 elements"
       (let ((new-maze (maze/carve-path empty-maze '(3 4 5))))
-        (expect (hash-table-count (maze-connections new-maze))
+        (expect (maze/map-count (maze-connections new-maze))
                 :to-be 2)
-        (expect (gethash '(3 . 4) (maze-connections new-maze)))
-        (expect (gethash '(4 . 5) (maze-connections new-maze)))))
+        (expect (maze/map-get '(3 . 4) (maze-connections new-maze)))
+        (expect (maze/map-get '(4 . 5) (maze-connections new-maze)))))
     (it "throws an error for non consecutive cells"
       (expect (maze/carve-path empty-maze '(3 5))
               :to-throw 'error)))

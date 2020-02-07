@@ -1,17 +1,18 @@
 (require 'cl)
 (require 'dash)
+(require 'maze-map)
 
 (cl-defstruct maze rows columns connections)
 
 (defun maze/create-empty (columns rows)
   (make-maze :rows rows
              :columns columns
-             :connections (make-hash-table :test 'equal)))
+             :connections (maze/map-create :test 'equal)))
 
 (defun maze/copy (source)
   (make-maze :rows (maze-rows source)
              :columns (maze-columns source)
-             :connections (copy-hash-table (maze-connections source))))
+             :connections (maze/map-copy (maze-connections source))))
 
 (defun maze/error-for-cell (maze cell)
   (let ((column (car cell))
@@ -69,10 +70,10 @@ Throws if the from and to cells are not neighbors"
   (let ((from-index (maze/position-to-index maze from))
         (to-index (maze/position-to-index maze to)))
     (let ((connection (maze/sort-passage from-index to-index)))
-      (if (gethash connection (maze-connections maze))
+      (if (maze/map-get connection (maze-connections maze))
           maze
         (let ((new-maze (maze/copy maze)))
-          (puthash connection t (maze-connections new-maze))
+          (maze/map-put connection t (maze-connections new-maze))
           new-maze)))))
 
 (defun maze/carve-passage-index (maze from-index to-index)
