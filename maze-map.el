@@ -24,7 +24,6 @@
 
 (defun maze/hash--table-to-list (table)
   "Return a list of (k . v) cons cells from a table"
-  ;;; TODO/FIXME potential for optimization using destructive operations
   (if (hash-table-p table)
       (let ((result))
         (maphash (lambda (k v)
